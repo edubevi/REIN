@@ -1,0 +1,4 @@
+Explicació de com calcular el page rank amb nodes aglotinadors:
+------------------------------------------------------------------
+
+    https://www.youtube.com/watch?v=_Wc9OkMKS3g

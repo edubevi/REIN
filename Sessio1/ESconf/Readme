@@ -1,0 +1,28 @@
+ElasticSearch Configuration
+===========================
+
+Copy elasticsearch.yml and log4j2.properties to a directory (for example /tmp/ESconf)
+
+Create directories for the data and the logs (for example /tmp/data and /tmp/logs)
+
+Edit elasticsearch.yml to point to the paths of the data and the logfiles directories
+
+Start elastic search with:
+
+
+$ ES_PATH_CONF=/path/to/configuration/files
+
+$ /path/to/elasticsearch/bin/elasticsearch
+
+-----------
+
+IN CASE OF EMERGENCY
+====================
+
+In some installs of ElasticSearch an error appears running the service complaining about writing to a configuration
+file regarding JAVA security, some times it continues without problem, sometimes the service does not start.
+
+The solution is to define the variable ES_JAVA_OPTS so this check is disregarded. Defining this variable depends on the
+unix shell that you are using, if you are using bash you have to type the following in a terminal:
+
+$ export ES_JAVA_OPTS='-Dlog4j2.disable.jmx=true'

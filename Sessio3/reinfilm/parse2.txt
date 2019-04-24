@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+import scrapy
+
+
+class TopfilmaffinitySpider(scrapy.Spider):
+    name = 'TopFilmaffinity'
+    allowed_domains = ['filmaffinity.com']
+    start_urls = ['https://www.filmaffinity.com/en/topgen.php?genre=&country=&notvse=1&fromyear=&toyear=&nodoc=1']
+
+    def parse(self, response):
+        """
+        Process the information of each page of top films
+
+        :param response:
+        :return:
+        """
+        for item, mark in zip(response.css('li.content'), response.css('li.data')):
+
+            doc = {}
+            data = item.css('div.mc-info-container')
+            doc['title'] = data.css('div.mc-title a::text').extract_first()
+            doc['url'] = response.urljoin(data.css('div.mc-title a::attr(href)').extract_first())
+            doc['country'] = data.css('div.mc-title img::attr(title)').extract_first()
+            credits = data.css('div.mc-director')
+            doc['director'] = credits.css('span.nb a::text').extract_first()
+            doc['mark'] = mark.css('div.avg-rating::text').extract_first()
+
+            yield scrapy.Request(doc['url'], callback=self.parse_detail, meta=doc)
+
+    def parse_detail(self, response):
+        """
+        Parses the information of the film detailed page
+
+        :param response:
+        :return:
+        """
+        detail = response.meta
+        data = response.css('dl.movie-info')
+        detail['year'] = data.css('dd[itemprop="datePublished"]::text').extract_first()
+        detail['duration'] = data.css('dd[itemprop="duration"]::text').extract_first()
+        detail['cast'] = ' '.join(data.css('span.cast a span::text').extract())
+#        actors = []
+#        for actor in data.css('span.cast'):
+#            actors.append(actor.css('a span::text').extract_first())
+#        detail['cast'] = ', '.join(actors)
+        detail['genre'] = ' '.join(data.css('span[itemprop="genre"] a::text').extract())
+        detail['synopsis'] = data.css('dd[itemprop="description"]::text').extract_first()
+        yield detail

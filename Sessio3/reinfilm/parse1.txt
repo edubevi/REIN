@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+import scrapy
+
+
+class TopfilmaffinitySpider(scrapy.Spider):
+    name = 'TopFilmaffinity'
+    allowed_domains = ['filmaffinity.com']
+    start_urls = ['https://www.filmaffinity.com/en/topgen.php?genre=&country=&notvse=1&fromyear=&toyear=&nodoc=1']
+
+    def parse(self, response):
+        """
+        Process the information of each page of films
+
+        :param response:
+        :return:
+        """
+        for item, mark in zip(response.css('li.content'), response.css('li.data')):
+
+            doc = {}
+            data = item.css('div.mc-info-container')
+            doc['title'] = data.css('div.mc-title a::text').extract_first()
+            doc['url'] = response.urljoin(data.css('div.mc-title a::attr(href)').extract_first())
+            doc['country'] = data.css('div.mc-title img::attr(title)').extract_first()
+            credits = data.css('div.mc-director')
+            doc['director'] = credits.css('span.nb a::text').extract_first()
+            doc['mark'] = mark.css('div.avg-rating::text').extract_first()
+
+            yield doc
+
+#Codi per trobar els actors (eliminat pq ja es fara al parse2)
+#            cast = data.css('div.mc-cast')
+#            actors = []
+#            for actor in cast.css('span.nb'):
+#                actors.append(actor.css('a::text').extract_first())
+#            doc['cast'] = ', '.join(actors)
